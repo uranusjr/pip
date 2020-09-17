@@ -1,19 +1,18 @@
 class AbstractProvider(object):
-    """Delegate class to provide requirement interface for the resolver.
-    """
+    """Delegate class to provide requirement interface for the resolver."""
 
-    def identify(self, dependency):
-        """Given a dependency, return an identifier for it.
+    def identify(self, requirement_or_candidate):
+        """Given a requirement or candidate, return an identifier for it.
 
-        This is used in many places to identify the dependency, e.g. whether
-        two requirements should have their specifier parts merged, whether
-        two specifications would conflict with each other (because they the
-        same name but different versions).
+        This is used in many places to identify a requirement or candidate,
+        e.g. whether two requirements should have their specifier parts merged,
+        whether two candidates would conflict with each other (because they
+        have same name but different versions).
         """
         raise NotImplementedError
 
     def get_preference(self, resolution, candidates, information):
-        """Produce a sort key for given specification based on preference.
+        """Produce a sort key for given requirement based on preference.
 
         The preference is defined as "I think this requirement should be
         resolved first". The lower the return value is, the more preferred
@@ -43,22 +42,25 @@ class AbstractProvider(object):
 
         A sortable value should be returned (this will be used as the `key`
         parameter of the built-in sorting function). The smaller the value is,
-        the more preferred this specification is (i.e. the sorting function
+        the more preferred this requirement is (i.e. the sorting function
         is called with `reverse=False`).
         """
         raise NotImplementedError
 
-    def find_matches(self, requirements):
-        """Find all possible candidates that satisfy the given requirements.
+    def find_matches(self, identifier, requirements):
+        """Find all possible candidates satisfying all identified requirements.
 
         This should try to get candidates based on the requirements' types.
         For VCS, local, and archive requirements, the one-and-only match is
         returned, and for a "named" requirement, the index(es) should be
         consulted to find concrete candidates for this requirement.
 
-        :param requirements: A collection of requirements which all of the the
-            returned candidates must match. All requirements are guaranteed to
-            have the same identifier. The collection is never empty.
+        :param identifier: An identifier as returned by ``identify()``, that
+            candidates returned by this function should identify as.
+        :param requirements: A mapping of requirements the resolver knows.
+            Each key is a requirement identifiers. Each value is a non-empty
+            collection of requirements of that identifier. ``identifier`` is
+            guarenteed to exist in the mapping.
         :returns: An iterable that orders candidates by preference, e.g. the
             most preferred candidate should come first.
         """
@@ -85,8 +87,7 @@ class AbstractProvider(object):
 
 
 class AbstractResolver(object):
-    """The thing that performs the actual resolution work.
-    """
+    """The thing that performs the actual resolution work."""
 
     base_exception = Exception
 

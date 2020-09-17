@@ -16,7 +16,7 @@ requests==2.24.0
     chardet==3.0.4
     idna==2.10
     urllib3==1.25.9
-resolvelib==0.4.0
+resolvelib @ https://github.com/sarugaku/resolvelib/archive/find-matches-pass-all-requirements.zip
 retrying==1.3.3
 setuptools==44.0.0
 six==1.15.0
