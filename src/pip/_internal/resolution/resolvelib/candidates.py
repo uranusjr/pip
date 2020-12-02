@@ -4,6 +4,7 @@ import sys
 from pip._vendor.packaging.specifiers import InvalidSpecifier, SpecifierSet
 from pip._vendor.packaging.utils import canonicalize_name
 from pip._vendor.packaging.version import Version
+from pip._vendor.packaging.version import parse as parse_version
 
 from pip._internal.exceptions import HashError, MetadataInconsistent
 from pip._internal.models.wheel import Wheel
@@ -287,7 +288,7 @@ class LinkCandidate(_InstallRequirementBackedCandidate):
             )
             # Version may not be present for PEP 508 direct URLs
             if version is not None:
-                wheel_version = Version(wheel.version)
+                wheel_version = parse_version(wheel.version)
                 assert version == wheel_version, (
                     "{!r} != {!r} for wheel {}".format(
                         version, wheel_version, name
