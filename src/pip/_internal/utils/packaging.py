@@ -58,7 +58,10 @@ def get_metadata(dist):
         metadata = ''
 
     if metadata is None:
-        raise NoneMetadataError(dist, metadata_name)
+        # HACK: Make get_metadata() accept BaseDistribution instead.
+        from pip._internal.metadata.pkg_resources import Distribution as _Dist
+
+        raise NoneMetadataError(_Dist(dist), metadata_name)
 
     feed_parser = FeedParser()
     # The following line errors out if with a "NoneType" TypeError if

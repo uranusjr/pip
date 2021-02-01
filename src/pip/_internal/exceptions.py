@@ -9,9 +9,9 @@ if MYPY_CHECK_RUNNING:
     from hashlib import _Hash
     from typing import Any, Dict, List, Optional
 
-    from pip._vendor.pkg_resources import Distribution
     from pip._vendor.requests.models import Request, Response
 
+    from pip._internal.metadata.base import BaseDistribution
     from pip._internal.req.req_install import InstallRequirement
 
 
@@ -41,7 +41,7 @@ class NoneMetadataError(PipError):
     """
 
     def __init__(self, dist, metadata_name):
-        # type: (Distribution, str) -> None
+        # type: (BaseDistribution, str) -> None
         """
         :param dist: A Distribution object.
         :param metadata_name: The name of the metadata being accessed

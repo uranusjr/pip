@@ -8,6 +8,10 @@ if MYPY_CHECK_RUNNING:
 
 
 class BaseDistribution:
+    def __str__(self):
+        # type: () -> str
+        return f"{self.canonical_name} {self.version}"
+
     @property
     def canonical_name(self):
         # type: () -> str
