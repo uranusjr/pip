@@ -33,11 +33,8 @@ class UninstallationError(PipError):
 
 class NoneMetadataError(PipError):
     """
-    Raised when accessing "METADATA" or "PKG-INFO" metadata for a
-    pip._vendor.pkg_resources.Distribution object and
-    `dist.has_metadata('METADATA')` returns True but
-    `dist.get_metadata('METADATA')` returns None (and similarly for
-    "PKG-INFO").
+    Raised when a Distribution object reports it has a "METADATA" or "PKG-INFO"
+    file, but is unable to return its content when requested.
     """
 
     def __init__(self, dist, metadata_name):

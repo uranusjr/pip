@@ -46,14 +46,13 @@ from pip._internal.utils.misc import (
     hide_url,
     redact_auth_from_url,
 )
-from pip._internal.utils.packaging import get_metadata
 from pip._internal.utils.temp_dir import TempDirectory, tempdir_kinds
 from pip._internal.utils.typing import MYPY_CHECK_RUNNING
 from pip._internal.utils.virtualenv import running_under_virtualenv
 from pip._internal.vcs import vcs
 
 if MYPY_CHECK_RUNNING:
-    from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
+    from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Union
 
     from pip._vendor.packaging.markers import Marker
     from pip._vendor.packaging.specifiers import SpecifierSet
@@ -558,11 +557,15 @@ class InstallRequirement:
 
     @property
     def metadata(self):
-        # type: () -> Any
-        if not hasattr(self, '_metadata'):
-            self._metadata = get_metadata(self.get_dist())
-
-        return self._metadata
+        # type: () -> Mapping[str, str]
+        try:
+            metadata = self._metadata
+        except AttributeError:
+            # HACK: Make self.get_dist() return BaseDistribution instead.
+            from pip._internal.metadata.pkg_resources import Distribution as _D
+            dist = _D(self.get_dist())
+            metadata = self._metadata = dist.metadata
+        return metadata
 
     def get_dist(self):
         # type: () -> Distribution

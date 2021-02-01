@@ -4,7 +4,7 @@ from pip._internal.utils.misc import stdlib_pkgs  # TODO: Move definition here.
 from pip._internal.utils.typing import MYPY_CHECK_RUNNING
 
 if MYPY_CHECK_RUNNING:
-    from typing import Container, Iterator, List, Optional
+    from typing import Container, Iterator, List, Mapping, Optional
 
 
 class BaseDistribution:
@@ -40,6 +40,16 @@ class BaseDistribution:
     @property
     def in_usersite(self):
         # type: () -> bool
+        raise NotImplementedError()
+
+    @property
+    def metadata(self):
+        # type: () -> Mapping[str, str]
+        """Read and parse the METADATA/PKG-INFO file in the distribution.
+
+        :raises NoneMetadataError: if the distribution reports it contains a
+            METADATA/PKG-INFO file, but is unable to return its content.
+        """
         raise NotImplementedError()
 
     def as_requirement_string(self):

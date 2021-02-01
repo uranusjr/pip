@@ -1,7 +1,11 @@
+import email.parser
+import logging
+
 from pip._vendor import pkg_resources
 from pip._vendor.packaging.utils import canonicalize_name
 from pip._vendor.packaging.version import _BaseVersion
 
+from pip._internal.exceptions import NoneMetadataError
 from pip._internal.utils import misc  # TODO: Move definition here.
 from pip._internal.utils.packaging import get_installer
 from pip._internal.utils.typing import MYPY_CHECK_RUNNING
@@ -9,7 +13,10 @@ from pip._internal.utils.typing import MYPY_CHECK_RUNNING
 from .base import BaseDistribution, BaseEnvironment
 
 if MYPY_CHECK_RUNNING:
-    from typing import Iterator, List, Optional
+    from typing import Iterator, List, Mapping, Optional
+
+
+logger = logging.getLogger(__name__)
 
 
 class Distribution(BaseDistribution):
@@ -46,6 +53,28 @@ class Distribution(BaseDistribution):
     def in_usersite(self):
         # type: () -> bool
         return misc.dist_in_usersite(self._dist)
+
+    @property
+    def metadata(self):
+        # type: () -> Mapping[str, str]
+        metadata_name = "METADATA"
+        if (isinstance(self._dist, pkg_resources.DistInfoDistribution) and
+                self._dist.has_metadata(metadata_name)):
+            metadata = self._dist.get_metadata(metadata_name)
+        elif self._dist.has_metadata("PKG-INFO"):
+            metadata_name = "PKG-INFO"
+            metadata = self._dist.get_metadata(metadata_name)
+        else:
+            logger.warning(
+                "No metadata found in %s",
+                misc.display_path(self._dist.location),
+            )
+            metadata = ""
+        if metadata is None:
+            raise NoneMetadataError(self, metadata_name)
+        feed_parser = email.parser.FeedParser()
+        feed_parser.feed(metadata)
+        return feed_parser.close()
 
 
 class Environment(BaseEnvironment):
