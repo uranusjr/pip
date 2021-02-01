@@ -1,5 +1,6 @@
 from pip._vendor import pkg_resources
 from pip._vendor.packaging.utils import canonicalize_name
+from pip._vendor.packaging.version import _BaseVersion
 
 from pip._internal.utils import misc  # TODO: Move definition here.
 from pip._internal.utils.packaging import get_installer
@@ -20,6 +21,11 @@ class Distribution(BaseDistribution):
     def canonical_name(self):
         # type: () -> str
         return canonicalize_name(self._dist.project_name)
+
+    @property
+    def version(self):
+        # type: () -> _BaseVersion
+        return self._dist.parsed_version
 
     @property
     def installer(self):

@@ -9,9 +9,10 @@ from collections import OrderedDict
 from distutils.sysconfig import get_python_lib
 from sysconfig import get_paths
 
-from pip._vendor.pkg_resources import Requirement, VersionConflict, WorkingSet
+from pip._vendor.packaging.requirements import Requirement
 
 from pip import __file__ as pip_location
+from pip._internal.metadata import get_environment
 from pip._internal.cli.spinners import open_spinner
 from pip._internal.utils.subprocess import call_subprocess
 from pip._internal.utils.temp_dir import TempDirectory, tempdir_kinds
@@ -148,15 +149,16 @@ class BuildEnvironment:
         """
         missing = set()
         conflicting = set()
-        if reqs:
-            ws = WorkingSet(self._lib_dirs)
-            for req in reqs:
-                try:
-                    if ws.find(Requirement.parse(req)) is None:
-                        missing.add(req)
-                except VersionConflict as e:
-                    conflicting.add((str(e.args[0].as_requirement()),
-                                     str(e.args[1])))
+        env = get_environment(self._lib_dirs)
+        for req_str in reqs:
+            req = Requirement(req_str)
+            if req.marker and not req.marker.evaluate():
+                continue
+            dist = env.get_distribution(req.name)
+            if not dist:
+                missing.add(req)
+            elif not req.specifier.contains(dist.version, prereleases=True):
+                conflicting.add((dist.as_requirement_string(), req_str))
         return conflicting, missing
 
     def install_requirements(

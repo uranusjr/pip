@@ -1,3 +1,5 @@
+from pip._vendor.packaging.version import _BaseVersion, Version
+
 from pip._internal.utils.misc import stdlib_pkgs  # TODO: Move definition here.
 from pip._internal.utils.typing import MYPY_CHECK_RUNNING
 
@@ -9,6 +11,11 @@ class BaseDistribution:
     @property
     def canonical_name(self):
         # type: () -> str
+        raise NotImplementedError()
+
+    @property
+    def version(self):
+        # type: () -> _BaseVersion
         raise NotImplementedError()
 
     @property
@@ -30,6 +37,11 @@ class BaseDistribution:
     def in_usersite(self):
         # type: () -> bool
         raise NotImplementedError()
+
+    def as_requirement_string(self):
+        # type: () -> str
+        op = "==" if isinstance(self.version, Version) else "==="
+        return f"{self.canonical_name}{op}{self.version}"
 
 
 class BaseEnvironment:
